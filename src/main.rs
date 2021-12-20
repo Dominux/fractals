@@ -1,12 +1,31 @@
-//! An example of generating julia fractals.
+use std::convert::TryInto;
+
 use image;
 use num_complex;
 
 /// https://www.rapidtables.com/convert/color/hsv-to-rgb.html
+#[allow(non_upper_case_globals)]
 fn hue_to_rgd(hue: u8) -> [u8; 3] {
-	// Expecting to be S and V in HSV 1
-	let c = 1;
-	let x = c * (1 - )
+    // Expecting to be S and V in HSV 1
+    const c: i32 = 1;
+    let hh = hue as f32 / 60.0;
+    let x = c * (1.0 - (hh % 2.0 - 1.0).abs()) as i32;
+
+    let result = match hh as i8 {
+        0 => [c, x, 0],
+        1 => [x, c, 0],
+        2 => [0, c, x],
+        3 => [0, x, c],
+        4 => [x, 0, c],
+        _ => [c, 0, x],
+    };
+
+    result
+        .into_iter()
+        .map(|x| (x * 255) as u8)
+        .collect::<Vec<_>>()
+        .try_into()
+        .expect("lol")
 }
 
 fn main() {
@@ -38,11 +57,11 @@ fn main() {
                 z = z * z + c;
                 i += 1;
             }
-			// println!("{}", i);
+            // println!("{}", i);
 
             let pixel = imgbuf.get_pixel_mut(x, y);
-            let image::(data) = *pixel;
-            *pixel = image::Rgb([data[0], i, data[2]]);
+            let image::Rgb(data) = *pixel;
+            *pixel = image::Rgb(hue_to_rgd(i));
         }
     }
 
